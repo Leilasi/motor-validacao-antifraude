@@ -3,10 +3,14 @@ package com.itau.antifraude.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
 @Entity
 @Table(name = "usuarios")
-public class Usuario {
+public class Usuario implements Serializable {
+        private static final long serialVersionUID = 1L;
+
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;
@@ -26,8 +30,9 @@ public class Usuario {
         @Column(nullable = false)
         private String dataNascimento;
 
-        @Column(nullable = false)
-        private String endereco;
+        @OneToOne(cascade = CascadeType.ALL)
+        @JoinColumn(name = "endereco_id", nullable = false, referencedColumnName = "id")
+        private Endereco endereco;
 
         @Column(nullable = false)
         private String nomeMae;

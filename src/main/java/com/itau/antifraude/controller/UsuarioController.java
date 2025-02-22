@@ -1,6 +1,6 @@
 package com.itau.antifraude.controller;
 
-import com.itau.antifraude.model.Usuario;
+import com.itau.antifraude.dto.request.UsuarioRequest;
 import com.itau.antifraude.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,9 +16,9 @@ public class UsuarioController {
     private UsuarioService usuarioService;
 
     @PostMapping
-    public String validarUsuario(@RequestBody Usuario usuario) {
-        int nota = usuarioService.validarUsuario(usuario);
-        usuarioService.salvarUsuario(usuario);
+    public String validarUsuario(@RequestBody UsuarioRequest usuarioDto) {
+        int nota = usuarioService.validarUsuario(usuarioDto);
+        usuarioService.salvarUsuario(usuarioDto);
         return "Grau de Confiabilidade: " + nota;
     }
 }
