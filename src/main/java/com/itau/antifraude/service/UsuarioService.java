@@ -6,8 +6,13 @@ import com.itau.antifraude.dto.response.UsuarioResponse;
 import com.itau.antifraude.mapper.UsuarioMapper;
 import com.itau.antifraude.model.Usuario;
 import com.itau.antifraude.repository.UsuarioRepository;
+import com.itau.antifraude.service.exception.ParametroInvalidoException;
 import com.itau.antifraude.service.exception.UsuarioInvalidoException;
+import com.itau.antifraude.service.exception.UsuarioNaoEncontradoException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -77,5 +82,23 @@ public class UsuarioService {
         usuario.setNotaConfiabilidade(gerarNotaAleatoria());
         return usuarioMapper.toResponseDTO(usuarioRepository.save(usuario));
     }
+
+    public Page<UsuarioResponse> obterUsuarios(Integer page, Integer linesPerPage) {
+        Pageable pageable = PageRequest.of(page, linesPerPage);
+        Page<Usuario> usuarios = usuarioRepository.findAll(pageable);
+        return usuarioMapper.toResponseDTOPage(usuarios);
+    }
+
+    public UsuarioResponse obterUsuarioPorCpf(String cpf) throws UsuarioNaoEncontradoException, ParametroInvalidoException {
+        if (cpf == null || cpf.isEmpty()) {
+            throw new ParametroInvalidoException("CPF informado está nulo ou vazio");
+        }
+        Usuario usuario = usuarioRepository.findByCpf(cpf);
+        if (usuario == null) {
+            throw new UsuarioNaoEncontradoException("Usuário não encontrado com CPF informado");
+        }
+        return usuarioMapper.toResponseDTO(usuario);
+    }
+
 
 }
