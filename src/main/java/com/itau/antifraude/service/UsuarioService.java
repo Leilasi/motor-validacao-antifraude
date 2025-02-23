@@ -2,9 +2,11 @@ package com.itau.antifraude.service;
 
 import com.itau.antifraude.dto.request.EnderecoRequest;
 import com.itau.antifraude.dto.request.UsuarioRequest;
+import com.itau.antifraude.dto.response.UsuarioResponse;
 import com.itau.antifraude.mapper.UsuarioMapper;
 import com.itau.antifraude.model.Usuario;
 import com.itau.antifraude.repository.UsuarioRepository;
+import com.itau.antifraude.service.exception.UsuarioInvalidoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,18 +22,18 @@ public class UsuarioService {
     @Autowired
     private UsuarioMapper usuarioMapper;
 
-    public int validarUsuario(UsuarioRequest usuarioRequest) {
+    public String validarUsuario(UsuarioRequest usuarioRequest) throws UsuarioInvalidoException {
 
-        if(validarCpf(usuarioRequest.cpf())
-                && validarNome(usuarioRequest.nome())
-                && validarTelefone(usuarioRequest.telefone())
-                && validarEmail(usuarioRequest.email())
-                && validarDataNascimento(usuarioRequest.dataNascimento())
-                && validarEndereco(usuarioRequest.endereco())){
-            return gerarNotaAleatoria();
+        if(validarCpf(usuarioRequest.getCpf())
+                && validarNome(usuarioRequest.getNome())
+                && validarTelefone(usuarioRequest.getTelefone())
+                && validarEmail(usuarioRequest.getEmail())
+                && validarDataNascimento(usuarioRequest.getDataNascimento())
+                && validarEndereco(usuarioRequest.getEndereco())){
+            return "Grau de Confiabilidade: " + gerarNotaAleatoria();
 
         }
-        return 0;
+        throw new UsuarioInvalidoException("Erro ao validar o usuário. Grau de Confiabilidade: " + 0);
     }
 
     private int gerarNotaAleatoria(){
@@ -62,9 +64,18 @@ public class UsuarioService {
         return endereco != null;
     }
 
-    public Usuario salvarUsuario(UsuarioRequest usuarioRequest) {
+    public UsuarioResponse salvarUsuario(UsuarioRequest usuarioRequest) throws UsuarioInvalidoException {
+        validarUsuario(usuarioRequest);
+        if (usuarioRepository.existsByCpf(usuarioRequest.getCpf())) {
+            throw new UsuarioInvalidoException("Já existe usuario cadastrado com cnpj informado");
+        }
+
+        if (usuarioRepository.existsByEmail(usuarioRequest.getEmail())) {
+            throw new UsuarioInvalidoException("Já existe usuario cadastrado com o email informado");
+        }
         Usuario usuario = usuarioMapper.toEntity(usuarioRequest);
-        return usuarioRepository.save(usuario);
+        usuario.setNotaConfiabilidade(gerarNotaAleatoria());
+        return usuarioMapper.toResponseDTO(usuarioRepository.save(usuario));
     }
 
 }

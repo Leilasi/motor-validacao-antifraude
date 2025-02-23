@@ -1,5 +1,9 @@
 package com.itau.antifraude.mapper;
 
-public interface GenericMapper<ENTIDADE, REQUEST> {
+import java.util.List;
+
+public interface GenericMapper<ENTIDADE, REQUEST, RESPONSE> {
     ENTIDADE toEntity(REQUEST request);
+    RESPONSE toResponseDTO(ENTIDADE entity);
+    List<RESPONSE> toResponseDTOList(List<ENTIDADE> entities);
 }

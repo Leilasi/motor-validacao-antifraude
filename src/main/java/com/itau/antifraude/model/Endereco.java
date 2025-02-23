@@ -30,4 +30,15 @@ public class Endereco implements Serializable {
     @Column(nullable = false)
     private String cep;
 
+    public Endereco() {
+    }
+
+    public Endereco(Long id, String rua, String bairro, String cidade, String estado, String cep) {
+        this.id = id;
+        this.rua = rua;
+        this.bairro = bairro;
+        this.cidade = cidade;
+        this.estado = estado;
+        this.cep = cep;
+    }
 }

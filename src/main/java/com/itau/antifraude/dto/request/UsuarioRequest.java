@@ -1,14 +1,18 @@
 package com.itau.antifraude.dto.request;
 
+import lombok.Data;
+
 import java.time.LocalDate;
 
-public record UsuarioRequest(
+@Data
+public class UsuarioRequest{
 
-        String cpf,
-        String nome,
-        String telefone,
-        String email,
-        LocalDate dataNascimento,
-        EnderecoRequest endereco,
-        String nomeMae) {
+        private String cpf;
+        private String nome;
+        private String telefone;
+        private String email;
+        private LocalDate dataNascimento;
+        private String nomeMae;
+        private EnderecoRequest endereco;
+
 }

@@ -1,11 +1,13 @@
 package com.itau.antifraude.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 
-@Data
+@Setter
+@Getter
 @Entity
 @Table(name = "usuarios")
 public class Usuario implements Serializable {
@@ -30,12 +32,35 @@ public class Usuario implements Serializable {
         @Column(nullable = false)
         private String dataNascimento;
 
+        @Column(nullable = false)
+        private String nomeMae;
+
+        @Column(nullable = false)
+        private Integer notaConfiabilidade;
+
         @OneToOne(cascade = CascadeType.ALL)
         @JoinColumn(name = "endereco_id", nullable = false, referencedColumnName = "id")
         private Endereco endereco;
 
-        @Column(nullable = false)
-        private String nomeMae;
+        public Usuario() {
+        }
+
+        public Usuario(Long id, String cpf, String nome, String telefone, String email, String dataNascimento, String nomeMae, Integer notaConfiabilidade, Endereco endereco) {
+                this.id = id;
+                this.cpf = cpf;
+                this.nome = nome;
+                this.telefone = telefone;
+                this.email = email;
+                this.dataNascimento = dataNascimento;
+                this.nomeMae = nomeMae;
+                this.notaConfiabilidade = notaConfiabilidade;
+                this.endereco = endereco;
+        }
+
+        //        public void setNotaConfiabilidade(Integer notaConfiabilidade) {
+//                this.notaConfiabilidade = notaConfiabilidade;
+//        }
+
 
 }
 

@@ -1,10 +1,13 @@
 package com.itau.antifraude.dto.request;
 
-public record EnderecoRequest(
+import lombok.Data;
 
-         String rua,
-         String bairro,
-         String cidade,
-         String estado,
-         String cep ) {
+@Data
+public class EnderecoRequest{
+
+    private String rua;
+    private String bairro;
+    private String cidade;
+    private String estado;
+    private String cep;
 }
