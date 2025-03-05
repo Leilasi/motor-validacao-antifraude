@@ -10,4 +10,6 @@ public class EnderecoRequest{
     private String cidade;
     private String estado;
     private String cep;
+
+
 }

@@ -41,31 +41,31 @@ public class UsuarioService {
         throw new UsuarioInvalidoException("Erro ao validar o usuário. Grau de Confiabilidade: " + 0);
     }
 
-    public int gerarNotaAleatoria(){
+    protected int gerarNotaAleatoria(){
         return new Random().nextInt(11);
     }
 
-    public boolean validarCpf(String cpf) {
+    protected boolean validarCpf(String cpf) {
         return cpf != null && cpf.length() == 11 && cpf.matches("[0-9]*");
     }
 
-    public boolean validarNome(String nome) {
+    protected boolean validarNome(String nome) {
         return nome != null && !nome.isEmpty();
     }
 
-    public boolean validarTelefone(String telefone) {
+    protected boolean validarTelefone(String telefone) {
         return telefone != null && !telefone.isEmpty();
     }
 
-    public boolean validarEmail(String email) {
+    protected boolean validarEmail(String email) {
         return email != null && !email.isEmpty() && email.contains("@");
     }
 
-    public boolean validarDataNascimento(LocalDate dataNascimento) {
+    protected boolean validarDataNascimento(LocalDate dataNascimento) {
         return dataNascimento != null;
     }
 
-    public boolean validarEndereco(EnderecoRequest endereco) {
+    protected boolean validarEndereco(EnderecoRequest endereco) {
         return endereco != null;
     }
 

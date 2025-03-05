@@ -1,20 +1,23 @@
-package com.itau.antifraude.service.impl;
+package com.itau.antifraude.service;
 
 import com.itau.antifraude.dto.request.EnderecoRequest;
 import com.itau.antifraude.dto.request.UsuarioRequest;
+import com.itau.antifraude.dto.response.EnderecoResponse;
 import com.itau.antifraude.dto.response.UsuarioResponse;
 import com.itau.antifraude.mapper.UsuarioMapper;
+import com.itau.antifraude.model.Endereco;
 import com.itau.antifraude.model.Usuario;
 import com.itau.antifraude.repository.UsuarioRepository;
-import com.itau.antifraude.service.UsuarioService;
 import com.itau.antifraude.service.exception.ParametroInvalidoException;
 import com.itau.antifraude.service.exception.UsuarioInvalidoException;
 import com.itau.antifraude.service.exception.UsuarioNaoEncontradoException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +33,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class UsuarioServiceTest {
 
     @InjectMocks
@@ -41,9 +45,72 @@ public class UsuarioServiceTest {
     @Mock
     private UsuarioMapper usuarioMapper;
 
+    private UsuarioRequest usuarioRequest;
+
+    private Usuario usuario;
+
+    private UsuarioResponse usuarioResponse;
+
+
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
+
+        usuarioRequest = new UsuarioRequest();
+        usuarioRequest.setCpf("12345678901");
+        usuarioRequest.setNome("Leila Fernanda");
+
+        usuarioRequest.setTelefone("11987654321");
+        usuarioRequest.setEmail("leila.fernanda@email.com");
+        usuarioRequest.setDataNascimento(LocalDate.of(1995, 6, 15));
+        usuarioRequest.setNomeMae("Maria Fernanda");
+
+        EnderecoRequest enderecoRequest = new EnderecoRequest();
+        enderecoRequest.setRua("Avenida Paulista");
+        enderecoRequest.setBairro("Bela Vista");
+        enderecoRequest.setCep("01311-000");
+        enderecoRequest.setCidade("São Paulo");
+        enderecoRequest.setEstado("SP");
+
+        usuarioRequest.setEndereco(enderecoRequest);
+
+        usuario = new Usuario();
+        usuario.setId(1L);
+        usuario.setCpf(usuarioRequest.getCpf());
+        usuario.setNome(usuarioRequest.getNome());
+        usuario.setTelefone(usuarioRequest.getTelefone());
+        usuario.setEmail(usuarioRequest.getEmail());
+        usuario.setDataNascimento(usuarioRequest.getDataNascimento());
+        usuario.setNomeMae(usuarioRequest.getNomeMae());
+
+        Endereco endereco = new Endereco();
+        endereco.setRua(enderecoRequest.getRua());
+        endereco.setBairro(enderecoRequest.getBairro());
+        endereco.setCep(enderecoRequest.getCep());
+        endereco.setCidade(enderecoRequest.getCidade());
+        endereco.setEstado(enderecoRequest.getEstado());
+
+        usuario.setEndereco(endereco);
+
+        usuarioResponse = new UsuarioResponse(
+                usuario.getId(),
+                usuario.getCpf(),
+                usuario.getNome(),
+                usuario.getTelefone(),
+                usuario.getEmail(),
+                usuario.getDataNascimento(),
+                usuario.getNomeMae(),
+                usuario.getNotaConfiabilidade(),
+                new EnderecoResponse(
+                        endereco.getId(),
+                        endereco.getRua(),
+                        endereco.getBairro(),
+                        endereco.getCidade(),
+                        endereco.getEstado(),
+                        endereco.getCep()
+                )
+        );
+
     }
 
     @Test
@@ -75,17 +142,16 @@ public class UsuarioServiceTest {
 
     @Test
     void deveLancarExcecaoQuandoUsuarioForInvalido() {
-
-        UsuarioRequest usuarioRequest = new UsuarioRequest();
-        usuarioRequest.setCpf(null); // CPF inválido
+        UsuarioRequest usuarioRequest = this.usuarioRequest;
+        usuarioRequest.setCpf("");
 
         UsuarioService usuarioServiceSpy = spy(usuarioService);
         doReturn(false).when(usuarioServiceSpy).validarCpf(anyString());
 
-
-        UsuarioInvalidoException exception = assertThrows(UsuarioInvalidoException.class, () -> {
-            usuarioServiceSpy.validarUsuario(usuarioRequest);
-        });
+        UsuarioInvalidoException exception = assertThrows(
+                UsuarioInvalidoException.class,
+                () -> usuarioServiceSpy.validarUsuario(usuarioRequest)
+        );
 
         assertEquals("Erro ao validar o usuário. Grau de Confiabilidade: 0", exception.getMessage());
     }
@@ -187,84 +253,49 @@ public class UsuarioServiceTest {
         assertFalse(usuarioService.validarEndereco(null));
     }
 
-//    @Test
-//    void deveSalvarUsuarioComSucesso() throws UsuarioInvalidoException {
-//        // Arrange
-//        UsuarioRequest usuarioRequest = new UsuarioRequest();
-//        usuarioRequest.setCpf("12345678901");
-//        usuarioRequest.setNome("Leila Fernanda");
-//        usuarioRequest.setTelefone("11987654321");
-//        usuarioRequest.setEmail("leila.fernanda@email.com");
-//        usuarioRequest.setDataNascimento(LocalDate.of(1995, 6, 15));
-//        usuarioRequest.setNomeMae("Maria Fernanda");
-//        usuarioRequest.setEndereco(null);
-//
-//        Long id = 1L;
-//        Integer notaConfiabilidade = 8;
-//        EnderecoResponse enderecoResponse = null;
-//
-//        UsuarioResponse usuarioResponse = new UsuarioResponse(
-//                id,
-//                "12345678901",
-//                "Leila Fernanda",
-//                "11987654321",
-//                "leila.fernanda@email.com",
-//                LocalDate.of(1995, 6, 15),
-//                "Maria Fernanda",
-//                notaConfiabilidade,
-//                enderecoResponse
-//        );
-//
-//        when(usuarioRepository.existsByCpf(usuarioRequest.getCpf())).thenReturn(false);
-//        when(usuarioRepository.existsByEmail(usuarioRequest.getEmail())).thenReturn(false);
-//        when(usuarioMapper.toResponseDTO(any(Usuario.class))).thenReturn(usuarioResponse);
-//
-//        doReturn(usuarioResponse).when(usuarioService).salvarUsuario(usuarioRequest);
-//
-//        // Act
-//        UsuarioResponse response = usuarioService.salvarUsuario(usuarioRequest);
-//
-//        // Assert
-//        assertNotNull(response);
-//        assertEquals(usuarioResponse, response);
-//        verify(usuarioRepository, times(1)).save(any(Usuario.class));
-//    }
+    @Test
+    void deveSalvarUsuarioComSucesso() throws UsuarioInvalidoException {
+        // Arrange
+        when(usuarioRepository.existsByCpf(usuarioRequest.getCpf())).thenReturn(false);
+        when(usuarioRepository.existsByEmail(usuarioRequest.getEmail())).thenReturn(false);
+        when(usuarioMapper.toEntity(usuarioRequest)).thenReturn(usuario);
+        when(usuarioRepository.save(usuario)).thenReturn(usuario);
+        when(usuarioMapper.toResponseDTO(usuario)).thenReturn(usuarioResponse);
 
-//    @Test
-//    void deveLancarExcecaoQuandoCpfJaCadastrado() {
-//        // Arrange
-//        UsuarioRequest usuarioRequest = new UsuarioRequest();
-//        usuarioRequest.setCpf("12345678901");
-//
-//        when(usuarioRepository.existsByCpf(usuarioRequest.getCpf())).thenReturn(true);
-//
-//        // Act & Assert
-//        UsuarioInvalidoException exception = assertThrows(UsuarioInvalidoException.class, () -> {
-//            usuarioService.salvarUsuario(usuarioRequest);
-//        });
-//
-//        assertEquals("Já existe usuario cadastrado com cnpj informado", exception.getMessage());
-//        verify(usuarioRepository, never()).save(any());
-//    }
+        UsuarioResponse response = usuarioService.salvarUsuario(usuarioRequest);
 
-//    @Test
-//    void deveLancarExcecaoQuandoEmailJaCadastrado() {
-//        // Arrange
-//        UsuarioRequest usuarioRequest = new UsuarioRequest();
-//        usuarioRequest.setCpf("12345678901");
-//        usuarioRequest.setEmail("leila.fernanda@email.com");
-//
-//        when(usuarioRepository.existsByCpf(usuarioRequest.getCpf())).thenReturn(false);
-//        when(usuarioRepository.existsByEmail(usuarioRequest.getEmail())).thenReturn(true);
-//
-//        // Act & Assert
-//        UsuarioInvalidoException exception = assertThrows(UsuarioInvalidoException.class, () -> {
-//            usuarioService.salvarUsuario(usuarioRequest);
-//        });
-//
-//        assertEquals("Já existe usuario cadastrado com o email informado", exception.getMessage());
-//        verify(usuarioRepository, never()).save(any());
-//    }
+        assertEquals(usuarioResponse, response);
+        verify(usuarioRepository, times(1)).save(any(Usuario.class));
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoCpfJaCadastrado() {
+        when(usuarioRepository.existsByCpf(usuarioRequest.getCpf())).thenReturn(true);
+
+        UsuarioInvalidoException exception = assertThrows(
+                UsuarioInvalidoException.class,
+                () -> usuarioService.salvarUsuario(usuarioRequest)
+        );
+
+        assertEquals("Já existe usuario cadastrado com cnpj informado", exception.getMessage());
+        verify(usuarioRepository, never()).save(any());
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoEmailJaCadastrado() {
+        // Arrange
+        when(usuarioRepository.existsByCpf(usuarioRequest.getCpf())).thenReturn(false);
+        when(usuarioRepository.existsByEmail(usuarioRequest.getEmail())).thenReturn(true);
+
+        // Act & Assert
+        UsuarioInvalidoException exception = assertThrows(
+                UsuarioInvalidoException.class,
+                () -> usuarioService.salvarUsuario(usuarioRequest)
+        );
+
+        assertEquals("Já existe usuario cadastrado com o email informado", exception.getMessage());
+        verify(usuarioRepository, never()).save(any());
+    }
 
     @Test
     void deveObterUsuariosComSucesso() {
@@ -287,49 +318,22 @@ public class UsuarioServiceTest {
         verify(usuarioRepository, times(1)).findAll(pageable);
     }
 
-//    @Test
-//    void deveObterUsuarioPorCpfComSucesso() throws UsuarioNaoEncontradoException, ParametroInvalidoException {
-//        // Arrange
-//        String cpf = "12345678901";
-//
-//        // Criando o Usuario e UsuarioResponse com os valores corretos
-//        Usuario usuario = new Usuario();
-//        usuario.setId(1L);
-//        usuario.setCpf(cpf);
-//        usuario.setNome("Leila Fernanda");
-//        usuario.setTelefone("11987654321");
-//        usuario.setEmail("leila.fernanda@email.com");
-//        usuario.setDataNascimento(LocalDate.of(1995, 6, 15));
-//        usuario.setNomeMae("Maria Fernanda");
-//
-//        UsuarioResponse usuarioResponse = new UsuarioResponse(
-//                usuario.getId(),
-//                usuario.getCpf(),
-//                usuario.getNome(),
-//                usuario.getTelefone(),
-//                usuario.getEmail(),
-//                usuario.getDataNascimento(),
-//                usuario.getNomeMae(),
-//                8,  // Exemplo de notaConfiabilidade
-//                null // Aqui você pode colocar o endereço, se necessário
-//        );
-//
-//        // Configuração do mock
-//        when(usuarioRepository.findByCpf(cpf)).thenReturn(usuario);
-//        when(usuarioMapper.toResponseDTO(usuario)).thenReturn(usuarioResponse);
-//
-//        // Act
-//        UsuarioResponse response = usuarioService.obterUsuarioPorCpf(cpf);
-//
-//        // Assert
-//        assertNotNull(response);
-//        assertEquals(usuarioResponse, response);
-//        verify(usuarioRepository, times(1)).findByCpf(cpf);
-//    }
+    @Test
+    void deveObterUsuarioPorCpfComSucesso() throws UsuarioNaoEncontradoException, ParametroInvalidoException {
+        String cpf = "12345678901";
+
+        when(usuarioRepository.findByCpf(cpf)).thenReturn(usuario);
+        when(usuarioMapper.toResponseDTO(usuario)).thenReturn(usuarioResponse);
+
+        UsuarioResponse response = usuarioService.obterUsuarioPorCpf(cpf);
+
+        assertNotNull(response);
+        assertEquals(usuarioResponse, response);
+        verify(usuarioRepository, times(1)).findByCpf(cpf);
+    }
 
     @Test
     void deveLancarExcecaoQuandoCpfNuloOuVazio() {
-        // Act & Assert
         ParametroInvalidoException exception = assertThrows(ParametroInvalidoException.class, () -> {
             usuarioService.obterUsuarioPorCpf("");
         });

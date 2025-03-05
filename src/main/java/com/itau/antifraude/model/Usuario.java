@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 
 @Setter
 @Getter
@@ -30,7 +31,7 @@ public class Usuario implements Serializable {
         private String email;
 
         @Column(nullable = false)
-        private String dataNascimento;
+        private LocalDate dataNascimento;
 
         @Column(nullable = false)
         private String nomeMae;
@@ -45,7 +46,7 @@ public class Usuario implements Serializable {
         public Usuario() {
         }
 
-        public Usuario(Long id, String cpf, String nome, String telefone, String email, String dataNascimento, String nomeMae, Integer notaConfiabilidade, Endereco endereco) {
+        public Usuario(Long id, String cpf, String nome, String telefone, String email, LocalDate dataNascimento, String nomeMae, Integer notaConfiabilidade, Endereco endereco) {
                 this.id = id;
                 this.cpf = cpf;
                 this.nome = nome;
@@ -56,11 +57,6 @@ public class Usuario implements Serializable {
                 this.notaConfiabilidade = notaConfiabilidade;
                 this.endereco = endereco;
         }
-
-        //        public void setNotaConfiabilidade(Integer notaConfiabilidade) {
-//                this.notaConfiabilidade = notaConfiabilidade;
-//        }
-
 
 }
 
