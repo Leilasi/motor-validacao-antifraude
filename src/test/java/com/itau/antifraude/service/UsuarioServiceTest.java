@@ -255,7 +255,6 @@ public class UsuarioServiceTest {
 
     @Test
     void deveSalvarUsuarioComSucesso() throws UsuarioInvalidoException {
-        // Arrange
         when(usuarioRepository.existsByCpf(usuarioRequest.getCpf())).thenReturn(false);
         when(usuarioRepository.existsByEmail(usuarioRequest.getEmail())).thenReturn(false);
         when(usuarioMapper.toEntity(usuarioRequest)).thenReturn(usuario);
@@ -283,11 +282,9 @@ public class UsuarioServiceTest {
 
     @Test
     void deveLancarExcecaoQuandoEmailJaCadastrado() {
-        // Arrange
         when(usuarioRepository.existsByCpf(usuarioRequest.getCpf())).thenReturn(false);
         when(usuarioRepository.existsByEmail(usuarioRequest.getEmail())).thenReturn(true);
 
-        // Act & Assert
         UsuarioInvalidoException exception = assertThrows(
                 UsuarioInvalidoException.class,
                 () -> usuarioService.salvarUsuario(usuarioRequest)
@@ -299,7 +296,6 @@ public class UsuarioServiceTest {
 
     @Test
     void deveObterUsuariosComSucesso() {
-        // Arrange
         int page = 0;
         int linesPerPage = 10;
         Pageable pageable = PageRequest.of(page, linesPerPage);
@@ -310,10 +306,8 @@ public class UsuarioServiceTest {
         when(usuarioRepository.findAll(pageable)).thenReturn(usuariosPage);
         when(usuarioMapper.toResponseDTOPage(usuariosPage)).thenReturn(Page.empty());
 
-        // Act
         Page<UsuarioResponse> response = usuarioService.obterUsuarios(page, linesPerPage);
 
-        // Assert
         assertNotNull(response);
         verify(usuarioRepository, times(1)).findAll(pageable);
     }
@@ -349,11 +343,9 @@ public class UsuarioServiceTest {
 
     @Test
     void deveLancarExcecaoQuandoUsuarioNaoForEncontrado() {
-        // Arrange
         String cpf = "12345678901";
         when(usuarioRepository.findByCpf(cpf)).thenReturn(null);
 
-        // Act & Assert
         UsuarioNaoEncontradoException exception = assertThrows(UsuarioNaoEncontradoException.class, () -> {
             usuarioService.obterUsuarioPorCpf(cpf);
         });
